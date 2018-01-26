@@ -11,7 +11,26 @@ function check(url, invocationParameters,  expectedResultData, expectedResultSta
         resultDataAsExpected: null
     }
 
+    var par = "?";
+    Object.keys(invocationParameters).forEach(function (key) {
+        par = par + key + "=" + invocationParameters[key] + "&";
+    });
+    par = par.substr(0,par.length-1);
 
+    //console.log(url+par);
+
+    return fetch(url+par).then(function(res) {
+        return res.json();
+    }).then(function(data){  
+
+        checkResult.urlChecked = url+par;
+        checkResult.resultData = data;
+        checkResult.resultStatus = res.status;
+        checkResult.statusTestPassed = (res.status == expectedResultStatus);
+        checkResult.resultDataAsExpected = compareResults(expectedResultData, data);
+        console.log(checkResult);
+        return checkResult;
+    });
 
 }
 
@@ -21,7 +40,7 @@ function check(url, invocationParameters,  expectedResultData, expectedResultSta
 function compareResults(expected, actual) {
     if (!expected) return true //always ok if there are no expectations
     if (!actual) return false
-    for (let e of Object.keys(expected)) {
+    for (var e of Object.keys(expected)) {
         if (actual[e]===undefined || expected[e]!=actual[e]  ) return false
     }
     return true
